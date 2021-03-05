@@ -52,23 +52,26 @@ def join_room(sid, room_id):
     if room:
         room.add_user(user)
         server.enter_room(sid, room_id)
+
         print(f'[ROOM] {game.find_user_by_sid(sid).name} joined room  {room.name}({room.id})')
 
-        server.emit('new_member', data=user.name, room=room.id, skip_sid=sid)
+        server.emit('member_join', data=user.name, room=room.id, skip_sid=sid)
         return Response.SUCCESS.value
     return Response.FAILURE.value
 
 
 @server.event
 def leave_room(sid):
-    room = game.find_room_by_user(game.find_user_by_sid(sid))
+    room = game.find_room_by_user(sid)
+    user = game.find_user_by_sid(sid)
 
     if room:
-        server.leave_room(sid, room.id)
         room.remove_user(game.find_user_by_sid(sid))
+        server.leave_room(sid, room.id)
 
         print(f'[ROOM] {game.find_user_by_sid(sid).name} left room {room.name}({room.id})')
 
+        server.emit('member_leave', data=user.name, room=room.id, skip_sid=sid)
         return Response.SUCCESS.value
     return Response.FAILURE.value
 
