@@ -3,10 +3,11 @@ from manager.moviemanager import Genre, Language
 
 
 class Room:
-    def __init__(self, id, movie_manager):
+    def __init__(self, id, movie_manager, name):
 
         self.movie_manager = movie_manager
 
+        self.name = name
         self.id = id
         self.admin = None
 

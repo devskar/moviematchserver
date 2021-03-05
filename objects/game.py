@@ -28,9 +28,9 @@ class Game:
             if user.sid == user_sid:
                 return user
 
-    def create_room(self, user):
+    def create_room(self, name):
         """Create a room and adds the creator to it"""
-        room = Room(self.latest_room_id, self.movie_manager)
+        room = Room(self.latest_room_id, self.movie_manager, name)
 
         self.current_rooms.add(room)
 
