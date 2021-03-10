@@ -3,9 +3,9 @@ from manager.moviemanager import Genre, Language
 
 
 class Room:
-    def __init__(self, id, movie_manager, name):
+    def __init__(self, id, mm, name):
 
-        self.movie_manager = movie_manager
+        self.mm = mm
 
         self.name = name
         self.id = id
@@ -16,7 +16,7 @@ class Room:
         self.genre = Genre.ALL
         self.language = Language.EN
 
-        self.current_movie = None
+        self.current_movie = mm.get_random_movie()
 
     def change_genre(self, genre):
         """Changes the current genre of the room"""
@@ -32,5 +32,9 @@ class Room:
     def remove_user(self, user):
         """Remove a user from the room"""
         self.participants.remove(user)
+
+    def close(self):
+        """Close the room"""
+        del self
 
 
