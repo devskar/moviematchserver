@@ -73,6 +73,7 @@ def leave_room(sid):
         print(f'[ROOM] {game.find_user_by_sid(sid).name} left room {room.name}({room.id})')
 
         server.emit('member_leave', data=user.name, room=room.id, skip_sid=sid)
+
         return Response.SUCCESS.value
     return Response.FAILURE.value
 
@@ -103,20 +104,37 @@ def get_room_member(sid):
 
 
 @server.event
-def match_movie(sid):
-    player = game.find_user_by_sid(sid)
+def vote_movie(sid, vote):
+    user = game.find_user_by_sid(sid)
     room = game.find_room_by_user(sid)
 
-    print(player.name, 'matches movie: ', room.current_movie['title'])
+    if vote == 0:
+        print(f'[ROOM] {user.name} positively votes on movie')
+        room.positive_vote_movie(user)
+    if vote == 1:
+        print(f'[ROOM] {user.name} negatively votes on movie')
+        room.negative_vote_movie(user)
+
+    if room.everyone_voted():
+        movie_rated(room.id, room.current_movie['title'], len(room.positive_votes), len(room.participants))
+        room.reset_votes()
+        room.current_movie = room.mm.get_random_movie()
+        update_movie(room)
 
 
-@server.event
-def nomatch_movie(sid):
-    player = game.find_user_by_sid(sid)
-    room = game.find_room_by_user(sid)
+def movie_rated(room_id, name, positive, participants):
+    data = {
+        'name': name,
+        'positive': positive,
+        'participants': participants
+    }
 
-    print(player.name, 'doesn\'t matches movie: ', room.current_movie['title'])
+    server.emit('movie_rated', data=data, room=room_id)
+
+
+def update_movie(room):
+    server.emit('update_movie', room=room.id)
 
 
 if __name__ == '__main__':
-    eventlet.wsgi.server(eventlet.listen(('', 5000)), app, log_output=False)
+    eventlet.wsgi.server(eventlet.listen(('', 5001)), app, log_output=False)
