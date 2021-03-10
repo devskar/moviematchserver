@@ -11,7 +11,7 @@ class Game:
 
         self.latest_room_id = 1
 
-        self.movie_manager = MovieManager()
+        self.movie_manager = MovieManager('manager/apikey.txt')
 
     def register_user(self, sid, name):
         """Initialize a new user"""
@@ -46,6 +46,14 @@ class Game:
         if room:
             room.add_user(user)
 
+    def leave_room(self, user):
+        """Remove a user leave the room"""
+
+        room = self.find_room_by_user(user.sid)
+
+        if room:
+            room.remove_user(user)
+
     def find_room_by_id(self, room_id):
         """Find a room by its id"""
 
@@ -60,4 +68,3 @@ class Game:
             for user in room.participants:
                 if user.sid == user_sid:
                     return room
-
