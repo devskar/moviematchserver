@@ -1,10 +1,12 @@
-from enum import Enum
+import threading
 import requests
 import random
 import pprint
 
 API_URL = 'https://api.themoviedb.org/3/'
 POSTER_URL = 'https://image.tmdb.org/t/p/w500{poster_link}'
+
+MOVIE_CASHE_LEN = 10
 
 printer = pprint.PrettyPrinter()
 
@@ -16,16 +18,25 @@ class MovieManager:
 
         self.latest_id = self.__get_latest_id()
 
-    def __get_latest_id(self):
-        """get latest added movie id"""
-        url = API_URL + f'movie/latest?api_key={self.key}'
-        response = requests.request('GET', url)
+        self.temp_movie = self.find_random_movie()
 
-        json = response.json()
+        self.random_movie_cashe = []
+        # adding a movie to make sure its not empty
+        self.random_movie_cashe.append(self.find_random_movie())
 
-        return json['id']
+        # starting a thread to add movies in the background
+        threading.Thread(target=self.load_random_movies).start()
+
+    def load_random_movies(self):
+        while True:
+            if len(self.random_movie_cashe) < MOVIE_CASHE_LEN:
+                self.random_movie_cashe.append(self.find_random_movie())
 
     def get_random_movie(self):
+        movie = self.random_movie_cashe.pop(0)
+        return movie
+
+    def find_random_movie(self):
         """get a random movie by finding a random integer that not greater then the latest id"""
         movie_id = random.randint(0, self.latest_id)
         url = API_URL + f'movie/{movie_id}?api_key={self.key}'
@@ -36,37 +47,34 @@ class MovieManager:
         # sometimes there is no movie to an id so if that happens just find a new random id
         if 'success' in json:
             if not json['success']:
-                return self.get_random_movie()
+                return self.find_random_movie()
 
         conditions = [
-            json['poster_path'] == None
+            json['poster_path'] is None,
+            json['adult'] is True
         ]
 
         if any(conditions):
-            return self.get_random_movie()
+            return self.find_random_movie()
 
         movie = {
             'title': json['title'],
             'genres': json['genres'],
             'original_lang': json['original_language'],
-            'adult': json['adult'],
             'overview': json['overview'],
             'poster_url': POSTER_URL.format(poster_link=json['poster_path'])
         }
 
         return movie
 
+    def __get_latest_id(self):
+        """get latest added movie id"""
+        url = API_URL + f'movie/latest?api_key={self.key}'
+        response = requests.request('GET', url)
 
-class Genre(Enum):
-    ALL = 1
-    COMEDY = 2
-    ACTION = 3
-    ADVENTURE = 4
-    SCIENCE_FICTION = 5
+        json = response.json()
 
-
-class Language(Enum):
-    EN = 'en-US'
+        return json['id']
 
 
 if __name__ == '__main__':
