@@ -74,6 +74,10 @@ def leave_room(sid):
 
         server.emit('member_leave', data=user.name, room=room.id, skip_sid=sid)
 
+        if room.is_closed():
+            game.current_rooms.remove(room)
+            server.close_room(room.id)
+
         return Response.SUCCESS.value
     return Response.FAILURE.value
 

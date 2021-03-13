@@ -42,17 +42,18 @@ class Room:
 
     def remove_user(self, user):
         """Remove a user from the room"""
-        self.participants.remove(user)
 
-        if user in self.negative_votes:
-            self.negative_votes.remove(user)
-        if user in self.positive_votes:
-            self.positive_votes.remove(user)
+        if user in self.participants:
 
+            self.participants.remove(user)
+
+            if user in self.negative_votes:
+                self.negative_votes.remove(user)
+            if user in self.positive_votes:
+                self.positive_votes.remove(user)
+
+    def is_closed(self):
         # if no users are in the room the room closes
         if len(self.participants) == 0:
-            self.close()
-
-    def close(self):
-        """Close the room"""
-        del self
+            return True
+        return False
