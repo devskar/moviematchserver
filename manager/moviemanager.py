@@ -76,7 +76,6 @@ class MovieManager:
 
         return json['id']
 
-
 if __name__ == '__main__':
     mm = MovieManager('apikey.txt')
     movie = mm.get_random_movie()

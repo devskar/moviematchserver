@@ -74,7 +74,7 @@ def leave_room(sid):
 
         server.emit('member_leave', data=user.name, room=room.id, skip_sid=sid)
 
-        if room.is_closed():
+        if room.is_empty():
             game.current_rooms.remove(room)
             server.close_room(room.id)
 
@@ -126,6 +126,10 @@ def vote_movie(sid, vote):
         update_movie(room)
 
 
+def genre_update(room_id, ):
+    pass
+
+
 def movie_rated(room_id, name, positive, participants):
     data = {
         'name': name,
@@ -142,3 +146,4 @@ def update_movie(room):
 
 if __name__ == '__main__':
     eventlet.wsgi.server(eventlet.listen(('', 5001)), app, log_output=False)
+    print('[SERVER] online and listening')

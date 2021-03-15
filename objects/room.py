@@ -17,6 +17,18 @@ class Room:
         self.positive_votes = set()
         self.negative_votes = set()
 
+        self.genres = set()
+
+    def add_genre(self, genre_id):
+        """Add a genre to the room"""
+        if genre_id not in self.genres:
+            self.genres.add(genre_id)
+
+    def remove_genre(self, genre_id):
+        """Remove a genre from the room"""
+        if genre_id in self.genres:
+            self.genres.remove(genre_id)
+
     def positive_vote_movie(self, user):
         self.positive_votes.add(user)
 
@@ -52,8 +64,8 @@ class Room:
             if user in self.positive_votes:
                 self.positive_votes.remove(user)
 
-    def is_closed(self):
-        # if no users are in the room the room closes
+    def is_empty(self):
+        """Checks if the room is empty"""
         if len(self.participants) == 0:
             return True
         return False
